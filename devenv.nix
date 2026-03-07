@@ -32,7 +32,7 @@ in
 
     materializePath = lib.mkOption {
       type = lib.types.str;
-      default = "AGENTS.md";
+      default = "AGENTS.override.md";
       description = "Relative or absolute output file path to materialize.";
     };
 

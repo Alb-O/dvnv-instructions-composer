@@ -6,7 +6,7 @@
 
 - `agentsInstructions.ownFragments`
 - `agentsInstructions.mergedFragments`
-- `agentsInstructions.materializePath` (default `AGENTS.md`)
+- `agentsInstructions.materializePath` (default `AGENTS.override.md`)
 - `agentsInstructions.materializeTemplate` (`plainText` or `codexConfigToml`)
 
 ## Output
@@ -15,4 +15,4 @@
 
 ## Notes
 
-- The `codexConfigToml` value for the `materializeTemplate` option uses codex's `developer_instructions` config key, materializing `.codex/config.toml` instead of `AGENTS.md`.
+- The `codexConfigToml` value for the `materializeTemplate` option uses codex's `developer_instructions` config key, materializing `.codex/config.toml` instead of `AGENTS.override.md`.
