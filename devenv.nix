@@ -1,63 +1,64 @@
 { pkgs, config, lib, ... }:
 
 let
-  cfg = config.developerInstructions;
-  developerInstructionsText = lib.concatStringsSep "\n\n" cfg.fragments;
-  outputDir = if cfg.outputDir == null then "" else cfg.outputDir;
-  hasOutputDir = outputDir != "";
-  configTomlPath = if hasOutputDir then "${outputDir}/config.toml" else "config.toml";
-  materializedFiles =
-    {
-      "${configTomlPath}".text = lib.concatStringsSep "\n" [
-        "developer_instructions = '''"
-        developerInstructionsText
-        "'''"
-        ""
-      ];
-    }
-    // lib.optionalAttrs (
-      hasOutputDir
-      && cfg.generateNestedGitignore != null
-      && cfg.generateNestedGitignore != ""
-    ) {
-      "${outputDir}/.gitignore".text = cfg.generateNestedGitignore;
-    };
+  cfg = config.agentsInstructions;
+  projectRoot = if config.git.root != null then config.git.root else config.devenv.root;
+  materializeAbsPath =
+    if lib.hasPrefix "/" cfg.materializePath
+    then cfg.materializePath
+    else "${projectRoot}/${cfg.materializePath}";
+  materializeTargetExists = builtins.pathExists materializeAbsPath;
+  materializedText =
+    if cfg.materializeTemplate == "codexConfigToml"
+    then lib.concatStringsSep "\n" [
+      "developer_instructions = '''"
+      agentsInstructionsText
+      "'''"
+      ""
+    ]
+    else agentsInstructionsText;
+  materializeEnabled =
+    if materializeTargetExists then
+      builtins.trace
+        "agentsInstructions: ${cfg.materializePath} already exists; skipping materialization to avoid overwriting."
+        false
+    else
+      true;
+  agentsInstructionsText = lib.concatStringsSep "\n" cfg.mergedFragments;
+  materializedFiles = {
+    "${cfg.materializePath}".text = materializedText;
+  };
 in
 {
-  options.developerInstructions = {
-    fragments = lib.mkOption {
+  options.agentsInstructions = {
+    ownFragments = lib.mkOption {
+      type = with lib.types; attrsOf (listOf str);
+      default = {};
+      description = "Project-owned instruction fragments keyed by project name.";
+    };
+
+    mergedFragments = lib.mkOption {
       type = with lib.types; listOf str;
       default = [];
       description = "Instruction text fragments merged from upstream to downstream repos.";
     };
 
-    materializeToCodexConfig = lib.mkOption {
-      type = lib.types.bool;
-      default = false;
-      description = "Whether to create .codex/config.toml with developer_instructions.";
+    materializePath = lib.mkOption {
+      type = lib.types.str;
+      default = "AGENTS.md";
+      description = "Relative or absolute output file path to materialize.";
     };
 
-    outputDir = lib.mkOption {
-      type = with lib.types; nullOr str;
-      default = ".codex";
-      description = "Output directory for config.toml. Set empty for repo root.";
-    };
-
-    generateNestedGitignore = lib.mkOption {
-      type = with lib.types; nullOr str;
-      default = "*";
-      description = "Contents for <outputDir>/.gitignore. Set empty to disable generation.";
+    materializeTemplate = lib.mkOption {
+      type = lib.types.enum [ "plainText" "codexConfigToml" ];
+      default = "plainText";
+      description = "Materialization template: plain text or Codex config TOML.";
     };
   };
 
   config = {
-    files = lib.mkIf cfg.materializeToCodexConfig materializedFiles;
+    files = lib.mkIf materializeEnabled materializedFiles;
 
-    outputs.developer_instructions = pkgs.writeText "developer-instructions.md" developerInstructionsText;
-
-    enterTest = ''
-      set -euo pipefail
-      test -f "${config.outputs.developer_instructions}"
-    '';
+    outputs.agents_instructions = pkgs.writeText "agents-instructions.md" agentsInstructionsText;
   };
 }

@@ -1,7 +1,19 @@
-# Codex Instructions Builder
+# Agents Instructions Builder
 
-`devenv` module for merging developer instruction fragments across imported repos.
+`devenv` module for merging agents instruction fragments across repos.
 
-* Upstream repos append to `developerInstructions.fragments`.
-* Downstream repos import the same module and continue appending.
-* Final consumer sets `developerInstructions.materializeToCodexConfig = true`.
+## Options
+
+- `agentsInstructions.ownFragments`
+- `agentsInstructions.mergedFragments`
+- `agentsInstructions.materializePath` (default `AGENTS.md`)
+- `agentsInstructions.materializeTemplate` (`plainText` or `codexConfigToml`)
+
+## Output
+
+- `outputs.agents_instructions`
+
+## Notes
+
+- The `codexConfigToml` value for the `materializeTemplate` option uses codex's `developer_instructions` config key, materializing `.codex/config.toml` instead of `AGENTS.md`.
+- If the target file already exists, materialization is skipped and warns.
