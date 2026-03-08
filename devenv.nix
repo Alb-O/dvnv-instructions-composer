@@ -34,8 +34,10 @@ in_inputs_block = False
 current = None
 
 def finish_current():
+    global current
     if current is not None and current.get("url"):
         entries.append({"name": current["name"], "url": current["url"]})
+    current = None
 
 for raw_line in lines:
     line = raw_line.rstrip("\n")
