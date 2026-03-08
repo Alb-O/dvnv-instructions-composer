@@ -4,6 +4,10 @@ let
   cfg = config.materializer;
   pythonWithYaml = pkgs.python3.withPackages (ps: [ ps.pyyaml ]);
   localInputOverridesScript = ./scripts/materialize_local_input_overrides.py;
+  localInputOverridesReposRoot =
+    if cfg.localInputOverrides.reposRoot != null
+    then cfg.localInputOverrides.reposRoot
+    else builtins.dirOf config.devenv.root;
   localInputOverridesSourcePath =
     if lib.hasPrefix "/" cfg.localInputOverrides.sourcePath
     then cfg.localInputOverrides.sourcePath
@@ -15,7 +19,7 @@ let
       passAsFile = [ "sourceYaml" ];
       sourceYaml = builtins.readFile localInputOverridesSourcePath;
       matchPattern = cfg.localInputOverrides.matchPattern;
-      reposRoot = cfg.localInputOverrides.reposRoot;
+      reposRoot = localInputOverridesReposRoot;
       urlScheme = cfg.localInputOverrides.urlScheme;
     } ''
       python3 ${localInputOverridesScript} "$sourceYamlPath" "$matchPattern" "$reposRoot" "$urlScheme" > "$out"
@@ -67,9 +71,9 @@ in
       };
 
       reposRoot = lib.mkOption {
-        type = lib.types.str;
-        default = "/home/albert/devenv/repos";
-        description = "Base directory containing local repos used for generated overrides.";
+        type = lib.types.nullOr lib.types.str;
+        default = null;
+        description = "Base directory containing local repos used for generated overrides. When null, materializer falls back to `builtins.dirOf config.devenv.root`.";
       };
 
       sourcePath = lib.mkOption {

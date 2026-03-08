@@ -9,7 +9,7 @@
 - `materializer.materializePath` (default `AGENTS.override.md`)
 - `materializer.materializeTemplate` (`plainText` or `codexConfigToml`)
 - `materializer.localInputOverrides.matchPattern` (default `Alb-O`)
-- `materializer.localInputOverrides.reposRoot` (default `/home/albert/devenv/repos`)
+- `materializer.localInputOverrides.reposRoot` (default `null`: parent of `config.devenv.root`)
 - `materializer.localInputOverrides.sourcePath` (default `devenv.yaml`)
 - `materializer.localInputOverrides.outputPath` (default `devenv.local.yaml`)
 - `materializer.localInputOverrides.urlScheme` (`path` or `git+file`, default `path`)
@@ -34,5 +34,6 @@ inputs:
 
 - The `codexConfigToml` value for the `materializeTemplate` option uses codex's `developer_instructions` config key, materializing `.codex/config.toml` instead of `AGENTS.override.md`.
 - `devenv.local.yaml` is materialized through `files` on shell entry as a symlink to the Nix store (same mechanism as `AGENTS.override.md`) only when at least one input matches.
+- For machine-local path overrides, set `materializer.localInputOverrides.reposRoot` in `devenv.local.nix` (untracked).
 - Use `materializer.localInputOverrides.urlScheme = "git+file"` if you explicitly want git-backed local input URLs.
 - For matched inputs, all existing sibling/child keys are preserved; only `url` is rewritten.
