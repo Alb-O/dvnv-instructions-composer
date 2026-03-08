@@ -33,10 +33,6 @@ inputs:
 ## Notes
 
 - The `codexConfigToml` value for the `materializeTemplate` option uses codex's `developer_instructions` config key, materializing `.codex/config.toml` instead of `AGENTS.override.md`.
-- Merge ordering strategy:
-  - upstream `materializer.mergedFragments` keep their declared order
-  - the current repo's own fragment (`materializer.ownFragments.<repo-name>`) is appended last (highest priority)
-  - duplicate fragment strings are de-duplicated with "keep last" semantics
 - The main materialized instruction file is only created when the effective merged fragment list is non-empty.
 - `devenv.local.yaml` is materialized through `files` on shell entry as a symlink to the Nix store (same mechanism as `AGENTS.override.md`) only when at least one input matches.
 - For machine-local path overrides, set `materializer.localInputOverrides.reposRoot` in `devenv.local.nix` (untracked).
