@@ -1,19 +1,19 @@
 # Materializer
 
-`devenv` module for merging agents instruction fragments across repos.
+`devenv` module for spawning files and merging fragments across repos.
 
-## Options
+## Options (`materializer.*` namespace)
 
-- `materializer.projectName` (default `null`: basename of `config.devenv.root`)
-- `materializer.ownFragments`
-- `materializer.mergedFragments`
-- `materializer.materializePath` (default `AGENTS.override.md`)
-- `materializer.materializeTemplate` (`plainText` or `codexConfigToml`)
-- `materializer.localInputOverrides.matchPattern` (default `Alb-O`)
-- `materializer.localInputOverrides.reposRoot` (default `null`: parent of `config.devenv.root`)
-- `materializer.localInputOverrides.sourcePath` (default `devenv.yaml`)
-- `materializer.localInputOverrides.outputPath` (default `devenv.local.yaml`)
-- `materializer.localInputOverrides.urlScheme` (`path` or `git+file`, default `path`)
+- `projectName` (default `null`: basename of `config.devenv.root`)
+- `ownFragments`
+- `mergedFragments`
+- `materializePath` (default `AGENTS.override.md`)
+- `materializeTemplate` (`plainText` or `codexConfigToml`)
+- `localInputOverrides.matchPattern` (default `Alb-O`)
+- `localInputOverrides.reposRoot` (default `null`: parent of `config.devenv.root`)
+- `localInputOverrides.sourcePath` (default `devenv.yaml`)
+- `localInputOverrides.outputPath` (default `devenv.local.yaml`)
+- `localInputOverrides.urlScheme` (`path` or `git+file`, default `path`)
 
 ## Output
 
@@ -39,7 +39,5 @@ inputs:
   - append `materializer.ownFragments.<current-project>` where current project is `materializer.projectName` or the basename of `config.devenv.root`
   - de-duplicate by fragment text with keep-last semantics (so the current project fragment ends up last/highest priority)
 - The main materialized instruction file is only created when this effective merged fragment list is non-empty.
-- `devenv.local.yaml` is materialized through `files` on shell entry as a symlink to the Nix store (same mechanism as `AGENTS.override.md`) only when at least one input matches.
 - For machine-local path overrides, set `materializer.localInputOverrides.reposRoot` in `devenv.local.nix` (untracked).
 - Use `materializer.localInputOverrides.urlScheme = "git+file"` if you explicitly want git-backed local input URLs.
-- For matched inputs, all existing sibling/child keys are preserved; only `url` is rewritten.
