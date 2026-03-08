@@ -8,6 +8,9 @@ let
     if cfg.localInputOverrides.reposRoot != null
     then cfg.localInputOverrides.reposRoot
     else builtins.dirOf config.devenv.root;
+  currentProjectName = builtins.baseNameOf (toString config.devenv.root);
+  currentProjectOwnFragments = lib.attrByPath [ currentProjectName ] [] cfg.ownFragments;
+  orderedMergedFragments = lib.reverseList (lib.unique (lib.reverseList (cfg.mergedFragments ++ currentProjectOwnFragments)));
   localInputOverridesSourcePath =
     if lib.hasPrefix "/" cfg.localInputOverrides.sourcePath
     then cfg.localInputOverrides.sourcePath
@@ -35,20 +38,20 @@ let
       ""
     ]
     else mergedMaterializerText;
-  mergedMaterializerText = lib.concatStringsSep "\n" cfg.mergedFragments;
+  mergedMaterializerText = lib.concatStringsSep "\n" orderedMergedFragments;
 in
 {
   options.materializer = {
     ownFragments = lib.mkOption {
       type = with lib.types; attrsOf (listOf str);
       default = {};
-      description = "Project-owned instruction fragments keyed by project name.";
+      description = "Project-owned instruction fragments keyed by project name. If a key matches the current project directory name, those fragments are appended last (highest priority).";
     };
 
     mergedFragments = lib.mkOption {
       type = with lib.types; listOf str;
       default = [];
-      description = "Instruction text fragments merged from upstream to downstream repos.";
+      description = "Instruction text fragments merged from upstream to downstream repos, preserving declared order.";
     };
 
     materializePath = lib.mkOption {
